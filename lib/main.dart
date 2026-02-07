@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'core/sessions/app_inializer.dart';
 import 'core/sessions/session_storage.dart';
@@ -14,6 +15,7 @@ import 'screen/app_init_screen.dart';
 import 'screen/login/services/fin_api.dart';
 import 'screen/login/services/login_service.dart';
 import 'screen/visitor/visitor_vehicle_register_screen.dart';
+import 'screen/search/search_vehicle_screen.dart';
 
 
 void main() async {
@@ -67,6 +69,16 @@ class ParkingApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      locale: const Locale('ko', 'KR'),
+      supportedLocales: const [
+        Locale('ko', 'KR'),
+        Locale('en', 'US'),
+      ],
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       routes: {
@@ -76,6 +88,7 @@ class ParkingApp extends StatelessWidget {
         '/vehicle-scan': (_) => const VehicleScanScreen(),
         '/resident/vehicle/register': (context) => const ResidentVehicleRegisterScreen(),
         '/visitor/vehicle/register': (context) => const VisitorVehicleRegisterScreen(),
+        '/vehicle/search': (context) => const SearchVehicleScreen(),
       },
     );
   }

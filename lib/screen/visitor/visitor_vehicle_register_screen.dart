@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../core/sessions/session_context.dart';
+import 'services/visitor_vehicle_api.dart';
 
 class VisitorVehicleRegisterScreen extends StatefulWidget {
   const VisitorVehicleRegisterScreen({super.key});
 
   @override
-  State<VisitorVehicleRegisterScreen> createState() =>
-      _VisitorVehicleRegisterScreenState();
+  State<VisitorVehicleRegisterScreen> createState() => _VisitorVehicleRegisterScreenState();
 }
 
-class _VisitorVehicleRegisterScreenState
-    extends State<VisitorVehicleRegisterScreen> {
+class _VisitorVehicleRegisterScreenState extends State<VisitorVehicleRegisterScreen> {
+
   final _formKey = GlobalKey<FormState>();
   late final SessionContext _sessionContext;
   bool _sessionInitialized = false;
@@ -77,26 +77,65 @@ class _VisitorVehicleRegisterScreenState
     }
   }
 
-  void _submit() {
+  void _submit() async {
+
     if (!_formKey.currentState!.validate()) return;
+
     if (_visitPeriod == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('방문 기간을 선택해주세요.')),
       );
+      
       return;
     }
 
-    final vehicleNo =
-        '${_vehicleNoPart1Controller.text}${_vehicleNoPart2Controller.text}${_vehicleNoPart3Controller.text}';
-    final phone =
-        '010-${_phonePart2Controller.text}-${_phonePart3Controller.text}';
+    setState(() => _loading = true);
 
-    // API 연동은 추후 추가
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('방문차량 등록: $vehicleNo, $phone')),
-    );
+    final vehicleNo = '${_vehicleNoPart1Controller.text}${_vehicleNoPart2Controller.text}${_vehicleNoPart3Controller.text}';
+    final phone = '010-${_phonePart2Controller.text}-${_phonePart3Controller.text}';
+    final String currentTime = DateFormat('HH:mm').format(DateTime.now());
+     
+    try {
+      final response = await VisitorVehicleApi.register(
+        vehicleNo: vehicleNo,
+        bdId: _bdIdController.text.trim(),
+        bdUnit: _bdUnitController.text.trim(),
+        phone: phone,
+        visitDate: DateFormat('yyyy-MM-dd').format(_visitPeriod!.start) ?? '',
+        visitTime: currentTime,
+        visitCloseDate: DateFormat('yyyy-MM-dd').format(_visitPeriod!.end) ?? '',
+        memo: _memoController.text.trim(),
+        sessionContext: _sessionContext,
+      );
 
-    Navigator.pop(context, true);
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(response.message)),
+      );
+ 
+      _resetForm(); 
+      //Navigator.pop(context, true);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('차량 등록에 실패했습니다: ${e.toString()}')),
+      );
+    } finally {
+      if (mounted) setState(() => _loading = false);
+      print(_loading);
+    }
+  }
+
+  void _resetForm() {
+    _vehicleNoPart1Controller.clear();
+    _vehicleNoPart2Controller.clear();
+    _vehicleNoPart3Controller.clear();
+    _bdIdController.clear();
+    _bdUnitController.clear();
+    _phonePart2Controller.clear();
+    _phonePart3Controller.clear();
+    _memoController.clear();
+    _visitPeriod = null;
   }
 
   @override
@@ -173,13 +212,14 @@ class _VisitorVehicleRegisterScreenState
                               maxLength: 1,
                               textAlign: TextAlign.center,
                               onChanged: (v) {
-                                if (v.length == 1) {
+                                /* if (v.length == 1) {
                                   _vehicleNoPart3Focus.requestFocus();
-                                }
+                                } */
                               },
-                              validator: (v) {
+                              validator: (v) 
+                              {
                                 if (v == null || v.length != 1) return '한 글자';
-                                if (!RegExp(r'^[가-힣]+$').hasMatch(v)) {
+                                if (v == null || !RegExp(r'^[가-힣]+$').hasMatch(v)) {
                                   return '한글';
                                 }
                                 return null;
@@ -323,8 +363,7 @@ class _VisitorVehicleRegisterScreenState
     if (start == null || end == null) {
       text = '방문 기간을 선택하세요';
     } else {
-      text =
-          '${DateFormat('yyyy.MM.dd').format(start)} - ${DateFormat('yyyy.MM.dd').format(end)}';
+      text = '${DateFormat('yyyy.MM.dd').format(start)} - ${DateFormat('yyyy.MM.dd').format(end)}';
     }
 
     return InkWell(
@@ -427,4 +466,5 @@ class _RoundedInput extends StatelessWidget {
       validator: validator,
     );
   }
+
 }

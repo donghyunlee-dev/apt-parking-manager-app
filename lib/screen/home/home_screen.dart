@@ -82,7 +82,12 @@ class HomeScreen extends StatelessWidget {
                 HomeActionCard(
                   title: '차량 조회',
                   assetPath: 'assets/icons/vehicle_search.png',
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.pushNamed(
+                      context,
+                      '/vehicle/search',   
+                    );
+                  },
                 ),
               ],
             ),
