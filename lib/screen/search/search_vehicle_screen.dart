@@ -13,7 +13,7 @@ class SearchVehicleScreen extends StatefulWidget {
 
 class _SearchVehicleScreenState extends State<SearchVehicleScreen> {
   final TextEditingController _searchController = TextEditingController();
-  List<SearchedVehicle> _searchResults = [];
+  SearchedVehicle? _searchResult; // Changed to single nullable vehicle
   bool _isLoading = false;
   bool _hasSearched = false;
   
@@ -33,7 +33,7 @@ class _SearchVehicleScreenState extends State<SearchVehicleScreen> {
   Future<void> _performSearch(String query) async {
     if (query.trim().isEmpty) {
       setState(() {
-        _searchResults = [];
+        _searchResult = null;
         _hasSearched = false;
       });
       return;
@@ -42,7 +42,7 @@ class _SearchVehicleScreenState extends State<SearchVehicleScreen> {
     setState(() {
       _isLoading = true;
       _hasSearched = true;
-      _searchResults = []; // Clear previous results
+      _searchResult = null; // Clear previous result
     });
 
     try {
@@ -53,7 +53,7 @@ class _SearchVehicleScreenState extends State<SearchVehicleScreen> {
 
       if (mounted) {
         setState(() {
-          _searchResults = response.data ?? [];
+          _searchResult = response.data; // Assign single result
           _isLoading = false;
         });
       }
@@ -157,50 +157,54 @@ class _SearchVehicleScreenState extends State<SearchVehicleScreen> {
   Widget _buildSearchResults() {
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
-    } else if (_hasSearched && _searchResults.isEmpty) {
+    } else if (_hasSearched && _searchResult == null) { // Check for null result after search
       return const Center(child: Text('검색 결과가 없습니다.'));
-    } else if (_searchResults.isNotEmpty) {
-      return ListView.builder(
+    } else if (_searchResult != null) { // Display single result
+      final vehicle = _searchResult!;
+      return SingleChildScrollView( // Changed from ListView.builder to SingleChildScrollView
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        itemCount: _searchResults.length,
-        itemBuilder: (context, index) {
-          final vehicle = _searchResults[index];
-          return Card(
-            margin: const EdgeInsets.only(bottom: 12),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            elevation: 1,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+        child: Card(
+          margin: const EdgeInsets.only(bottom: 12),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          elevation: 1,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  vehicle.vehicleNo,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '타입: ${_getVehicleType(vehicle.type)}',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 4),
+                if (vehicle.bdId != null && vehicle.bdUnit != null)
                   Text(
-                    vehicle.vehicleNo,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '타입: ${_getVehicleType(vehicle.type)}',
+                    '정보: ${vehicle.bdId} ${vehicle.bdUnit}', // Removed '동' and '호' as they are already in the data
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
+                if (vehicle.phone?.isNotEmpty ?? false) ...[
                   const SizedBox(height: 4),
-                  if (vehicle.bdId != null && vehicle.bdUnit != null)
-                    Text(
-                      '정보: ${vehicle.bdId}동 ${vehicle.bdUnit}호',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  if (vehicle.memo?.isNotEmpty ?? false) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      '메모: ${vehicle.memo}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
-                    ),
-                  ],
+                  Text(
+                    '연락처: ${vehicle.phone}',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
                 ],
-              ),
+                if (vehicle.memo?.isNotEmpty ?? false) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    '메모: ${vehicle.memo}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
+                  ),
+                ],
+              ],
             ),
-          );
-        },
+          ),
+        ),
       );
     } else {
       return const Center(child: Text('차량 번호를 입력하여 검색해주세요.'));
@@ -209,11 +213,11 @@ class _SearchVehicleScreenState extends State<SearchVehicleScreen> {
 
   String _getVehicleType(String type) {
     switch (type) {
-      case 'resident':
+      case 'RESIDENT':
         return '입주민';
-      case 'visitor':
+      case 'VISITOR':
         return '방문객';
-      case 'unregistered':
+      case 'UNREGISTERED':
         return '미등록';
       default:
         return '알 수 없음';

@@ -8,7 +8,11 @@ class ApiClient {
   /// ✅ 기존 호출 방식 유지
   /// ApiClient.get('/path', {'q': '1'});
   /// ApiClient.get('/path', {'q': '1'}, headers: {...});
-  static Future<Map<String, dynamic>> get(String path, Map<String, String>? query, {Map<String, String>? headers}) async {
+  static Future<Map<String, dynamic>> get({
+    required String path,
+    Map<String, String>? query,
+    Map<String, String>? headers,
+  }) async {
     
     final uri = Uri.parse('$baseUrl$path').replace(queryParameters: query);
 
