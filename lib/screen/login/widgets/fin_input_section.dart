@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/constants/colors.dart';
 
 class FinInputSection extends StatelessWidget {
   final String fin;
@@ -18,21 +19,12 @@ class FinInputSection extends StatelessWidget {
         final filled = index < fin.length;
 
         return Container(
-          width: 32,
-          height: 40,
-          margin: const EdgeInsets.symmetric(horizontal: 6),
+          width: 20,
+          height: 20,
+          margin: const EdgeInsets.symmetric(horizontal: 10),
           decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(
-                width: 2,
-                color: filled ? Colors.black : Colors.grey,
-              ),
-            ),
-          ),
-          child: Center(
-            child: filled
-                ? const Icon(Icons.circle, size: 10)
-                : const SizedBox.shrink(),
+            color: filled ? AppColors.primary : AppColors.divider,
+            shape: BoxShape.circle,
           ),
         );
       }),

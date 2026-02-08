@@ -21,11 +21,13 @@ class FinApi {
       },
     );
           
-    if (response.isEmpty) {
+    final Map<String, dynamic> data = response.containsKey('payload') ? response['payload'] : response;
+          
+    if (data.isEmpty) {
           return null;
         }
 
-    debugPrint('response!!! = ${response}');     
-    return Bouncer.fromJson(response);
+    debugPrint('Bouncer Data: $data');     
+    return Bouncer.fromJson(data);
   }
 }

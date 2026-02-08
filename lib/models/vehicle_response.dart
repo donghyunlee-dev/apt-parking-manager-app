@@ -12,9 +12,9 @@ class VehicleResponse<T> {
     T Function(Object?) fromJsonT,
   ) {
     return VehicleResponse(
-      message: json['message'],
-      data: json.containsKey('residentVehicle') && json['residentVehicle'] != null
-          ? fromJsonT(json['residentVehicle'])
+      message: json['message'] ?? '',
+      data: json.containsKey('payload') && json['payload'] != null
+          ? fromJsonT(json['payload'])
           : null,
     );
   }

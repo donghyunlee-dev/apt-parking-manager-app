@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import '../../core/flatform/location_channel.dart';
 import '../../core/sessions/session_context.dart';
+import '../../core/utils/location_service.dart';
+import '../../core/constants/colors.dart';
 import '../../models/apartment.dart';
 import '../../models/bouncer.dart';
 import 'services/apartment_api.dart';
@@ -22,6 +22,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   Apartment? apartment;
+  String? _currentAddress;
 
   bool _isLoading = false;
   bool _isBlocked = false;
@@ -86,6 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
       children: [
         ApartmentSection(
           apartment: apartment,
+          currentAddress: _currentAddress,
           isLoading: _isLoading,
           onRefresh: _loadApartment,
         ),
@@ -101,6 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
         const SizedBox(height: 32),
 
         if (!_showFinInput) _buildActionButton(),
+
       ],
     );
   }
@@ -109,7 +112,6 @@ class _LoginScreenState extends State<LoginScreen> {
   /// 버튼 분기
   /// -----------------------
   Widget _buildActionButton() {
-    // 아파트 정보 있음
     if (apartment != null) {
       return SizedBox(
         width: double.infinity,
@@ -127,19 +129,8 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     }
 
-    // 아파트 정보 없음
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: () {
-          // TODO: 아파트 등록 화면 이동
-        },
-        child: const Text(
-          '아파트 등록',
-          style: TextStyle(fontSize: 18),
-        ),
-      ),
-    );
+    // 아파트가 없으면 아무것도 표시하지 않거나 정보를 안내함
+    return const SizedBox();
   }
 
   /// -----------------------
@@ -198,33 +189,35 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final address = await LocationChannel.getCurrentAddress();
+      final locationService = LocationService();
+      final address = await locationService.getCurrentAddress();
 
-      if (address == null || address.isEmpty) return;
+      setState(() {
+        _currentAddress = address;
+      });
+
+      if (address == null) {
+        _showError('위치 정보를 가져올 수 없습니다.');
+        return;
+      }
 
       final result = await ApartmentApi.findByAddress(address);
 
       setState(() {
         apartment = result;
       });
-    } on PlatformException catch (e) {
-      if (e.code == 'PERMISSION') {
-        final status = await Permission.locationWhenInUse.request();
-        if (status.isGranted) {
-
-          final address = await LocationChannel.getCurrentAddress();
-
-          if (address == null || address.isEmpty) return;
-
-          final result = await ApartmentApi.findByAddress(address);
-          setState(() {
-            apartment = result;
-          });
-        }
-      }
+    } catch (e) {
+      debugPrint('Error loading apartment: $e');
+      _showError('아파트 정보를 불러오는 중 오류가 발생했습니다.');
     } finally {
       setState(() => _isLoading = false);
     }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
+    );
   }
 
   /// -----------------------
@@ -251,30 +244,38 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _submitFinCode() async {
- 
     setState(() => _isSubmitting = true);
-
+ 
     try {
-      final bouncer = _loginService.login(aptCode: apartment!.code, aptName: apartment!.name, finCode: _fin, address: apartment!.address);
+      final bouncer = await _loginService.login(
+        aptCode: apartment!.code,
+        aptName: apartment!.name,
+        finCode: _fin,
+        address: apartment!.address,
+      );
     
-      if (bouncer != true) {
-           
-        Navigator.pushReplacementNamed(
-          context,
-          '/home',
-        );
+      if (bouncer != null) {
+        if (!mounted) return;
+        Navigator.pushReplacementNamed(context, '/home');
         return;
       }
 
-      _handleFailed();
-    } catch (_) {
-      _handleFailed();
+      _handleFailed('인증 정보가 올바르지 않습니다.');
+    } catch (e) {
+      debugPrint('Login error: $e');
+      _handleFailed(e.toString().replaceAll('Exception: ', ''));
     } finally {
-      setState(() => _isSubmitting = false);
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+          _fin = ''; // 실패 시 입력값 초기화
+        });
+      }
     }
   }
 
-  void _handleFailed() {
+  void _handleFailed(String message) {
+    _showError(message);
     setState(() {
       _failCount++;
       if (_failCount >= 5) {

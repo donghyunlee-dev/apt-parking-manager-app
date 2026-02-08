@@ -34,13 +34,20 @@ class LoginService {
         location: address,
       );
 
-    if (bouncer == null) {
+    if (bouncer == null || bouncer.code.isEmpty) {
       throw Exception('FIN verification failed');
     }
 
-    Session _session = Session(deviceId: deviceId, aptCode: aptCode, aptName: aptName, bouncerCode: bouncer.code, bouncerName: bouncer.name);
-    await sessionStorage.save(_session);
-    sessionContext.setSession(_session);
+    final session = Session(
+      deviceId: deviceId,
+      aptCode: aptCode,
+      aptName: aptName,
+      bouncerCode: bouncer.code,
+      bouncerName: bouncer.name,
+      createdAt: DateTime.now(),
+    );
+    await sessionStorage.save(session);
+    sessionContext.setSession(session);
 
     return bouncer;
   }

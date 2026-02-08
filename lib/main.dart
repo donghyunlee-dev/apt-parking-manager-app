@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'screen/settings/settings_screen.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+import 'core/constants/theme.dart';
 import 'core/sessions/app_inializer.dart';
 import 'core/sessions/session_storage.dart';
+import 'core/providers/settings_provider.dart';
 import 'core/devices/device_id_provider.dart';
 import 'core/sessions/app_init_result.dart';
 import 'core/sessions/session_context.dart';
@@ -16,6 +19,7 @@ import 'screen/login/services/fin_api.dart';
 import 'screen/login/services/login_service.dart';
 import 'screen/visitor/visitor_vehicle_register_screen.dart';
 import 'screen/search/search_vehicle_screen.dart';
+import 'core/utils/location_service.dart';
 
 
 void main() async {
@@ -28,10 +32,12 @@ void main() async {
   final deviceIdProvider = DeviceIdProvider(secureStorage);
   final sessionContext = SessionContext();
   final finApi = FinApi();
+  final locationService = LocationService();
   
   final initializer = AppInitializer(
     sessionStorage: sessionStorage,
     deviceIdProvider: deviceIdProvider,
+    locationService: locationService,
   );
 
   final loginService = LoginService(
@@ -47,11 +53,16 @@ void main() async {
     debugPrint('🚀 AppInit Session loaded: ${result.session}');
   }
 
+  final settingsProvider = SettingsProvider();
+  await settingsProvider.init();
+
   runApp(
     MultiProvider(
       providers: [
         Provider<LoginService>.value(value: loginService),
         ChangeNotifierProvider<SessionContext>.value(value: sessionContext),
+        ChangeNotifierProvider<SettingsProvider>.value(value: settingsProvider),
+        Provider<LocationService>.value(value: locationService),
       ],
       child: ParkingApp(result: result,),
     ),
@@ -69,6 +80,8 @@ class ParkingApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Parking Manager',
+      theme: AppTheme.light,
       locale: const Locale('ko', 'KR'),
       supportedLocales: const [
         Locale('ko', 'KR'),
@@ -89,6 +102,7 @@ class ParkingApp extends StatelessWidget {
         '/resident/vehicle/register': (context) => const ResidentVehicleRegisterScreen(),
         '/visitor/vehicle/register': (context) => const VisitorVehicleRegisterScreen(),
         '/vehicle/search': (context) => const SearchVehicleScreen(),
+        '/settings': (context) => const SettingsScreen(),
       },
     );
   }

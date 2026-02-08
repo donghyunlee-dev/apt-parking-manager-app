@@ -4,13 +4,15 @@ class Session {
   final String aptName;
   final String bouncerCode;
   final String bouncerName;
-
+  final DateTime createdAt;
+  
   const Session({
     required this.deviceId,
     required this.aptCode,
     required this.aptName,
     required this.bouncerCode,
     required this.bouncerName,
+    required this.createdAt,
   });
  
   @override

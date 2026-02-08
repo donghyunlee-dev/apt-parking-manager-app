@@ -16,8 +16,8 @@ class SearchVehicleApi {
     return VehicleResponse.fromJson(
       response,
       (json) {
-        if (json != null && json is Map<String, dynamic> && json.containsKey('payload')) {
-          return SearchedVehicle.fromJson(json['payload'] as Map<String, dynamic>);
+        if (json != null && json is Map<String, dynamic>) {
+          return SearchedVehicle.fromJson(json);
         }
         return null;
       },

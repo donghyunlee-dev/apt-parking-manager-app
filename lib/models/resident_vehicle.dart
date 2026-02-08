@@ -25,21 +25,19 @@ final String aptCode;
 
   factory ResidentVehicle.fromJson(Map<String, dynamic> json) {
     return ResidentVehicle(
-      aptCode: json['aptCode'],
-      vehicleNo: json['vehicleNo'],
-      bdId: json['bdId'],
-      bdUnit: json['bdUnit'],
-      phone: json['phone'],
-      used: json['used'],
-      createdId: json['createdId'],
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'])
+      aptCode: json['apt_code'] ?? '',
+      vehicleNo: json['vehicle_no'] ?? '',
+      bdId: json['bd_id'] ?? '',
+      bdUnit: json['bd_unit'] ?? '',
+      phone: json['phone'] ?? '',
+      used: json['used'] == 'Y',
+      createdId: json['created_id'],
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
           : null,
-      updatedId: json['updatedId'] != null
-          ? json['updatedId']
-          : null,
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'])
+      updatedId: json['updated_id'],
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'])
           : null,
     );
   }

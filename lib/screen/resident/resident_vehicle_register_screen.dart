@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter/services.dart';
-import 'services/resident_vehicle_api.dart';
+import 'package:intl/intl.dart';
+import 'dart:async';
 import '../../core/sessions/session_context.dart';
+import 'services/resident_vehicle_api.dart';
+import '../../core/constants/colors.dart';
 
 class ResidentVehicleRegisterScreen extends StatefulWidget {
   const ResidentVehicleRegisterScreen({super.key});
@@ -12,37 +14,55 @@ class ResidentVehicleRegisterScreen extends StatefulWidget {
 }
 
 class _ResidentVehicleRegisterScreenState extends State<ResidentVehicleRegisterScreen> {
-
   final _formKey = GlobalKey<FormState>();
   late final SessionContext _sessionContext;
   bool _sessionInitialized = false;
 
-  // Vehicle Number Controllers
   final _vehicleNoPart1Controller = TextEditingController();
   final _vehicleNoPart2Controller = TextEditingController();
   final _vehicleNoPart3Controller = TextEditingController();
+  final _vehicleNoPart1Focus = FocusNode();
   final _vehicleNoPart2Focus = FocusNode();
   final _vehicleNoPart3Focus = FocusNode();
 
-  // Building/Unit Controllers
   final _bdIdController = TextEditingController();
   final _bdUnitController = TextEditingController();
 
-  // Phone Number Controllers
   final _phonePart2Controller = TextEditingController();
   final _phonePart3Controller = TextEditingController();
   final _phonePart3Focus = FocusNode();
 
+  Timer? _hangulTimer;
   final _memoController = TextEditingController();
-
-  bool _used = true;
   bool _loading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final args = ModalRoute.of(context)?.settings.arguments;
+      if (args is String) {
+        _fillVehicleNo(args);
+      }
+    });
+  }
+
+  void _fillVehicleNo(String vehicleNo) {
+    final regex = RegExp(r'^(\d{2,3})([가-힣])(\d{4})$');
+    final match = regex.firstMatch(vehicleNo);
+    if (match != null) {
+      _vehicleNoPart1Controller.text = match.group(1) ?? '';
+      _vehicleNoPart2Controller.text = match.group(2) ?? '';
+      _vehicleNoPart3Controller.text = match.group(3) ?? '';
+    }
+  }
 
   @override
   void dispose() {
     _vehicleNoPart1Controller.dispose();
     _vehicleNoPart2Controller.dispose();
     _vehicleNoPart3Controller.dispose();
+    _vehicleNoPart1Focus.dispose();
     _vehicleNoPart2Focus.dispose();
     _vehicleNoPart3Focus.dispose();
     _bdIdController.dispose();
@@ -57,15 +77,13 @@ class _ResidentVehicleRegisterScreenState extends State<ResidentVehicleRegisterS
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
     if (!_sessionInitialized) {
       _sessionContext = context.read<SessionContext>();
       _sessionInitialized = true;
     }
   }
 
-  Future<void> _submit() async {
-
+  void _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _loading = true);
@@ -84,266 +102,25 @@ class _ResidentVehicleRegisterScreenState extends State<ResidentVehicleRegisterS
       );
 
       if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(response.message)),
-      );
- 
-      _resetForm(); 
-      //Navigator.pop(context, true);
+      _showSuccess(response.message);
+      _resetForm();
+      _vehicleNoPart1Focus.requestFocus(); // Explicit focus after reset
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('차량 등록에 실패했습니다: ${e.toString()}')),
-      );
+      _showError('차량 등록에 실패했습니다: ${e.toString()}');
     } finally {
       if (mounted) setState(() => _loading = false);
-      print(_loading);
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+  void _showSuccess(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: AppColors.success),
+    );
+  }
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FB),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        foregroundColor: Colors.black,
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '입주민 차량 등록',
-                    style: theme.textTheme.headlineSmall
-                        ?.copyWith(fontWeight: FontWeight.w700),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    '차량 정보를 입력해주세요',
-                    style: theme.textTheme.bodyMedium
-                        ?.copyWith(color: Colors.grey.shade600),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: Form(
-                key: _formKey,
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 16),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            flex: 3,
-                            child: _RoundedInput(
-                              controller: _vehicleNoPart1Controller,
-                              label: '차량 번호',
-                              keyboardType: TextInputType.number,
-                              maxLength: 3,
-                              textAlign: TextAlign.center,
-                              onChanged: (v) {
-                                if (v.length == 3) {
-                                  _vehicleNoPart2Focus.requestFocus();
-                                }
-                              },
-                              validator: (v) => v == null || (v.length < 2 || v.length > 3)
-                                  ? '2-3자리'
-                                  : null,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            flex: 2,
-                            child: _RoundedInput(
-                              controller: _vehicleNoPart2Controller,
-                              label: ' ',
-                              focusNode: _vehicleNoPart2Focus,
-                              maxLength: null,
-                              textAlign: TextAlign.center,
-                              onChanged: (v) {
-                                /* if (v.length == 1) {
-                                  _vehicleNoPart3Focus.requestFocus();
-                                } */
-                              },
-                              validator: (v) 
-                              {
-                                if (v == null || v.length != 1) return '한 글자';
-                                if (v == null || !RegExp(r'^[가-힣]+$').hasMatch(v)) {
-                                  return '한글';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            flex: 4,
-                            child: _RoundedInput(
-                              controller: _vehicleNoPart3Controller,
-                              label: ' ',
-                              focusNode: _vehicleNoPart3Focus,
-                              textAlign: TextAlign.center,
-                              keyboardType: TextInputType.number,
-                              maxLength: 4,
-                              validator: (v) => v == null || v.length != 4
-                                  ? '4자리'
-                                  : null,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: _RoundedInput(
-                              controller: _bdIdController,
-                              label: '동',
-                              textAlign: TextAlign.center,
-                              keyboardType: TextInputType.number,
-                              validator: (v) =>
-                                  v == null || v.isEmpty ? '동 입력' : null,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _RoundedInput(
-                              controller: _bdUnitController,
-                              label: '호',
-                              textAlign: TextAlign.center,
-                              keyboardType: TextInputType.number,
-                              validator: (v) =>
-                                  v == null || v.isEmpty ? '호 입력' : null,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: _RoundedInput(
-                              enabled: false,
-                              label: '010',
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _RoundedInput(
-                              controller: _phonePart2Controller,
-                              label: '',
-                              textAlign: TextAlign.center,
-                              keyboardType: TextInputType.number,
-                              maxLength: 4,
-                              onChanged: (v) {
-                                if (v.length == 4) {
-                                  _phonePart3Focus.requestFocus();
-                                }
-                              },
-                              validator: (v) =>
-                                  v == null || v.length != 4 ? '4자리' : null,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _RoundedInput(
-                              controller: _phonePart3Controller,
-                              label: '',
-                              focusNode: _phonePart3Focus,
-                              textAlign: TextAlign.center,
-                              keyboardType: TextInputType.number,
-                              maxLength: 4,
-                              validator: (v) =>
-                                  v == null || v.length != 4 ? '4자리' : null,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      _RoundedInput(
-                        controller: _memoController,
-                        label: '메모',
-                        maxLines: 3,
-                        textAlign: TextAlign.left,
-                      ),
-                      const SizedBox(height: 24),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey.shade200)),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('차량 사용 여부',
-                                      style: theme.textTheme.bodyLarge
-                                          ?.copyWith(
-                                              fontWeight: FontWeight.w600)),
-                                  const SizedBox(height: 4),
-                                  Text('비활성화 시 미등록 차량으로 인식합니다.',
-                                      style: theme.textTheme.bodySmall
-                                          ?.copyWith(
-                                              color: Colors.grey.shade600))
-                                ]),
-                            Switch(
-                                value: _used,
-                                onChanged: (v) => setState(() => _used = v))
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-              child: SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: _loading ? null : _submit,
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: theme.colorScheme.primary,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18)),
-                      elevation: 0),
-                  child: _loading
-                      ? const SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white))
-                      : const Text('등록',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w600)),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: AppColors.error),
     );
   }
 
@@ -356,6 +133,177 @@ class _ResidentVehicleRegisterScreenState extends State<ResidentVehicleRegisterS
     _phonePart2Controller.clear();
     _phonePart3Controller.clear();
     _memoController.clear();
+    if (mounted) {
+      FocusScope.of(context).unfocus();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        title: const Text('입주 차량 등록'),
+      ),
+      body: SafeArea(
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle('차량 번호'),
+                const SizedBox(height: 12),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: _RoundedInput(
+                        controller: _vehicleNoPart1Controller,
+                        label: '앞자리',
+                        focusNode: _vehicleNoPart1Focus,
+                        keyboardType: TextInputType.number,
+                        maxLength: 3,
+                        textAlign: TextAlign.center,
+                        onChanged: (v) {
+                          if (v.length == 3) _vehicleNoPart2Focus.requestFocus();
+                        },
+                        validator: (v) => v == null || (v.length < 2 || v.length > 3) ? '2-3자리' : null,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      flex: 2,
+                      child: _RoundedInput(
+                        controller: _vehicleNoPart2Controller,
+                        label: '한글',
+                        focusNode: _vehicleNoPart2Focus,
+                        maxLength: 2,
+                        textAlign: TextAlign.center,
+                        onChanged: (v) {
+                          _hangulTimer?.cancel();
+                          // 완성된 한글 1자일 때만 0.6초 후 포커스 이동
+                          if (v.length == 1 && RegExp(r'^[가-힣]$').hasMatch(v)) {
+                            _hangulTimer = Timer(const Duration(milliseconds: 600), () {
+                              if (mounted && _vehicleNoPart2Controller.text == v) {
+                                _vehicleNoPart3Focus.requestFocus();
+                              }
+                            });
+                          }
+                        },
+                        validator: (v) => (v == null || !RegExp(r'^[가-힣]$').hasMatch(v)) ? '한글 1자' : null,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      flex: 4,
+                      child: _RoundedInput(
+                        controller: _vehicleNoPart3Controller,
+                        label: '뒷자리',
+                        focusNode: _vehicleNoPart3Focus,
+                        textAlign: TextAlign.center,
+                        keyboardType: TextInputType.number,
+                        maxLength: 4,
+                        validator: (v) => v == null || v.length != 4 ? '4자리' : null,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('동/호수'),
+                const SizedBox(height: 12),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: _RoundedInput(
+                        controller: _bdIdController,
+                        label: '동(숫자만)',
+                        keyboardType: TextInputType.number,
+                        validator: (v) => v == null || v.isEmpty ? '필수' : null,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _RoundedInput(
+                        controller: _bdUnitController,
+                        label: '호(숫자만)',
+                        keyboardType: TextInputType.number,
+                        validator: (v) => v == null || v.isEmpty ? '필수' : null,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('연락처'),
+                const SizedBox(height: 12),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Expanded(child: _RoundedInput(enabled: false, label: '010')),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _RoundedInput(
+                        controller: _phonePart2Controller,
+                        label: '중간',
+                        keyboardType: TextInputType.number,
+                        maxLength: 4,
+                        onChanged: (v) {
+                          if (v.length == 4) _phonePart3Focus.requestFocus();
+                        },
+                        validator: (v) => v == null || v.length != 4 ? '4자리' : null,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _RoundedInput(
+                        controller: _phonePart3Controller,
+                        label: '끝',
+                        focusNode: _phonePart3Focus,
+                        keyboardType: TextInputType.number,
+                        maxLength: 4,
+                        validator: (v) => v == null || v.length != 4 ? '4자리' : null,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('메모'),
+                const SizedBox(height: 12),
+                _RoundedInput(
+                  controller: _memoController,
+                  label: '관리자 확인용',
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: _loading ? null : _submit,
+                    child: _loading
+                        ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                        : const Text('차량 등록하기'),
+                  ),
+                ),
+                const SizedBox(height: 40),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.greyText),
+    );
   }
 }
 
@@ -402,8 +350,7 @@ class _RoundedInput extends StatelessWidget {
         filled: true,
         fillColor: enabled ? Colors.white : Colors.grey.shade200,
         counterText: '',
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
         border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: Colors.grey.shade300, width: 1)),
@@ -413,8 +360,7 @@ class _RoundedInput extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide:
-              BorderSide(color: theme.colorScheme.primary, width: 2),
+          borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),

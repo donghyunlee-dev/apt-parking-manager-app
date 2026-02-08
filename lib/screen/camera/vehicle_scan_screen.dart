@@ -13,6 +13,7 @@ import '../../models/vehicle_scan_voice.dart';
 import '../../features/ocr/vehicle_ocr_service.dart';
 import 'services/parking_api.dart';
 import '../../core/sessions/session_context.dart';
+import '../../core/providers/settings_provider.dart';
 
 
 class VehicleScanScreen extends StatefulWidget {
@@ -116,12 +117,16 @@ class _VehicleScanScreenState extends State<VehicleScanScreen> {
   }
 
   void _onScanResult(ParkingVehicle result) {
+    if (!mounted) return;
+    final settings = context.read<SettingsProvider>();
     setState(() {
       _result = result;
       _isLoading = false;
     });
   
-    VoiceFeedbackService().speak(result.voiceMessage!);
+    if (result.voiceMessage != null && settings.isVoiceEnabled) {
+      VoiceFeedbackService().speak(result.voiceMessage!);
+    }
   }
   
   void _calculateOverlayRect(BuildContext context) {
@@ -206,9 +211,16 @@ class _VehicleScanScreenState extends State<VehicleScanScreen> {
      
     setState(() => _isLoading = true);
     
-    final result = await ParkingApi.getVehicle(plate, _sessionContext);
-      
-    _onScanResult(result);
+    try {
+      final result = await ParkingApi.getVehicle(plate, _sessionContext);
+      _onScanResult(result);
+    } catch (e) {
+      debugPrint('Parking info request failed: $e');
+      if (mounted) {
+        setState(() => _isLoading = false);
+        _showError(e.toString().replaceAll('Exception: ', ''));
+      }
+    }
   }
  
   void _onConfirm() {
@@ -230,10 +242,13 @@ class _VehicleScanScreenState extends State<VehicleScanScreen> {
   }
 
   void _startAutoScan() {
+    final settings = context.read<SettingsProvider>();
+    if (!settings.isAutoScanEnabled) return;
+
     _scanTimer?.cancel();
 
     _scanTimer = Timer.periodic(
-      const Duration(seconds: 2),
+      const Duration(milliseconds: 800), // 더 빠른 인식을 위해 0.8초로 단축
       (_) => _autoScan(),
     );
   }

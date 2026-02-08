@@ -29,23 +29,21 @@ final String aptCode;
 
   factory VisitorVehicle.fromJson(Map<String, dynamic> json) {
     return VisitorVehicle(
-      aptCode: json['aptCode'],
-      vehicleNo: json['vehicleNo'],
-      bdId: json['bdId'],
-      bdUnit: json['bdUnit'],
-      phone: json['phone'],
-      visitDate: json['visitDate'],
-      visitTime: json['visitTime'],
-      visitCloseDate: json['visitCloseDate'],
-      createdId: json['createdId'],
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'])
+      aptCode: json['apt_code'] ?? '',
+      vehicleNo: json['vehicle_no'] ?? '',
+      bdId: json['bd_id'] ?? '',
+      bdUnit: json['bd_unit'] ?? '',
+      phone: json['phone'] ?? '',
+      visitDate: json['visit_date'] != null ? DateTime.parse(json['visit_date']) : DateTime.now(),
+      visitTime: json['visit_time'] ?? '',
+      visitCloseDate: json['visit_close_date'] != null ? DateTime.parse(json['visit_close_date']) : DateTime.now(),
+      createdId: json['created_id'],
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
           : null,
-      updatedId: json['updatedId'] != null
-          ? json['updatedId']
-          : null,
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'])
+      updatedId: json['updated_id'],
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'])
           : null,
     );
   }
