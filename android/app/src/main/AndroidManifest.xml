@@ -1,8 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="apt_parking_manager"
+        android:label="파킹케어"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <meta-data
+            android:name="com.kakao.sdk.AppKey"
+            android:value="8954cca8dc3fd84fe637c56de4a5b73f" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

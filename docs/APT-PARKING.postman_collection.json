@@ -1,0 +1,625 @@
+{
+  "info": {
+    "_postman_id": "423a3945-afa4-4a8c-b984-8e687a382a24",
+    "name": "APT-PARKING",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "2134841"
+  },
+  "item": [
+    {
+      "name": "Add Apartment",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"apt_name\": \"구굴아파트\",\r\n    \"address\": \"서판로 30\",\r\n    \"building\": 20,\r\n    \"resident\": 100\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/apartment",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "apartment"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Search Apartment",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/api/apartment?address=%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD%20%EC%9D%B8%EC%B2%9C%EA%B4%91%EC%97%AD%EC%8B%9C%20%EB%82%A8%EB%8F%99%EA%B5%AC%20%EB%A7%8C%EC%88%983%EB%8F%99%20844-7",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "apartment"
+          ],
+          "query": [
+            {
+              "key": "address",
+              "value": "%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD%20%EC%9D%B8%EC%B2%9C%EA%B4%91%EC%97%AD%EC%8B%9C%20%EB%82%A8%EB%8F%99%EA%B5%AC%20%EB%A7%8C%EC%88%983%EB%8F%99%20844-7"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Access login",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"apt_code\": \"A0001\",\r\n    \"fin_code\": \"123456\",\r\n    \"device_id\": \"abdc60ab-3546-4573-a2d3-ede15a79da98\",\r\n    \"location\": \"서판로 30\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/access",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "access"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Search Parking",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Apt-Code",
+            "value": "A0001",
+            "type": "text"
+          },
+          {
+            "key": "X-Bouncer-Code",
+            "value": "B000",
+            "type": "text"
+          },
+          {
+            "key": "X-Device-Id",
+            "value": "abdc60ab-3546-4573-a2d3-ede15a79da98",
+            "type": "text"
+          },
+          {
+            "key": "X-App-Version",
+            "value": "0.0.1",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseURL}}/api/vehicles/parking?vehicle_no=58마6665",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "vehicles",
+            "parking"
+          ],
+          "query": [
+            {
+              "key": "vehicle_no",
+              "value": "58마6665"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Add Resident",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-Apt-Code",
+            "value": "A0001",
+            "type": "text"
+          },
+          {
+            "key": "X-Bouncer-Code",
+            "value": "B000",
+            "type": "text"
+          },
+          {
+            "key": "X-Device-Id",
+            "value": "abdc60ab-3546-4573-a2d3-ede15a79da98",
+            "type": "text"
+          },
+          {
+            "key": "X-App-Version",
+            "value": "0.0.1",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"vehicle_no\": \"22가1253\",\r\n    \"bd_id\": \"1동\",\r\n    \"bd_unit\": \"402호\",\r\n    \"phone\": \"010-2342-5123\",\r\n    \"memo\": \"이사옴\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/vehicles/residents",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "vehicles",
+            "residents"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update Resident",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "X-Apt-Code",
+            "value": "A0001",
+            "type": "text"
+          },
+          {
+            "key": "X-Bouncer-Code",
+            "value": "B000",
+            "type": "text"
+          },
+          {
+            "key": "X-Device-Id",
+            "value": "abdc60ab-3546-4573-a2d3-ede15a79da98",
+            "type": "text"
+          },
+          {
+            "key": "X-App-Version",
+            "value": "0.0.1",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"bd_id\": \"1동\",\r\n    \"bd_unit\": \"401호\",\r\n    \"phone\": \"010-2342-5123\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/vehicles/residents/55가1253",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "vehicles",
+            "residents",
+            "55가1253"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Chage Usage Resident",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "X-Apt-Code",
+            "value": "A0001",
+            "type": "text"
+          },
+          {
+            "key": "X-Bouncer-Code",
+            "value": "B000",
+            "type": "text"
+          },
+          {
+            "key": "X-Device-Id",
+            "value": "abdc60ab-3546-4573-a2d3-ede15a79da98",
+            "type": "text"
+          },
+          {
+            "key": "X-App-Version",
+            "value": "0.0.1",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/vehicles/residents/55가1253",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "vehicles",
+            "residents",
+            "55가1253"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Resident",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "X-Apt-Code",
+            "value": "A0001",
+            "type": "text"
+          },
+          {
+            "key": "X-Bouncer-Code",
+            "value": "B000",
+            "type": "text"
+          },
+          {
+            "key": "X-Device-Id",
+            "value": "abdc60ab-3546-4573-a2d3-ede15a79da98",
+            "type": "text"
+          },
+          {
+            "key": "X-App-Version",
+            "value": "0.0.1",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/vehicles/residents/55가1253",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "vehicles",
+            "residents",
+            "55가1253"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Add visitor",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-Apt-Code",
+            "value": "A0001",
+            "type": "text"
+          },
+          {
+            "key": "X-Bouncer-Code",
+            "value": "B000",
+            "type": "text"
+          },
+          {
+            "key": "X-Device-Id",
+            "value": "abdc60ab-3546-4573-a2d3-ede15a79da98",
+            "type": "text"
+          },
+          {
+            "key": "X-App-Version",
+            "value": "0.0.1",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"vehicle_no\": \"55가1253\",\r\n    \"bd_id\": \"1동\",\r\n    \"bd_unit\": \"402호\",\r\n    \"phone\": \"010-2342-5123\",\r\n    \"visit_date\": \"2026-02-06\",\r\n    \"visit_time\": \"12:34\",\r\n    \"visit_close_date\": \"2026-01-29\",\r\n    \"memo\": \"방문증\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/vehicles/visitors",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "vehicles",
+            "visitors"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Add visitor Copy",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-Apt-Code",
+            "value": "A0001",
+            "type": "text"
+          },
+          {
+            "key": "X-Bouncer-Code",
+            "value": "B000",
+            "type": "text"
+          },
+          {
+            "key": "X-Device-Id",
+            "value": "abdc60ab-3546-4573-a2d3-ede15a79da98",
+            "type": "text"
+          },
+          {
+            "key": "X-App-Version",
+            "value": "0.0.1",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"vehicle_no\": \"55가1253\",\r\n    \"bd_id\": \"1동\",\r\n    \"bd_unit\": \"402호\",\r\n    \"phone\": \"010-2342-5123\",\r\n    \"visit_date\": \"2026-01-28\",\r\n    \"visit_time\": \"12:34\",\r\n    \"visit_close_date\": \"2026-01-29\",\r\n    \"memo\": \"방문증\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/vehicles/visitors",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "vehicles",
+            "visitors"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update visitor",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "X-Apt-Code",
+            "value": "A0001",
+            "type": "text"
+          },
+          {
+            "key": "X-Bouncer-Code",
+            "value": "B000",
+            "type": "text"
+          },
+          {
+            "key": "X-Device-Id",
+            "value": "abdc60ab-3546-4573-a2d3-ede15a79da98",
+            "type": "text"
+          },
+          {
+            "key": "X-App-Version",
+            "value": "0.0.1",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"bd_id\": \"1동\",\r\n    \"bd_unit\": \"402호\",\r\n    \"phone\": \"010-2342-5123\",\r\n    \"visit_date\": \"2026-01-28\",\r\n    \"visit_time\": \"12:34\",\r\n    \"visit_close_date\": \"2026-01-29\",\r\n    \"memo\": \"방문증\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/vehicles/visitors/55가1253",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "vehicles",
+            "visitors",
+            "55가1253"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete visitor",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "X-Apt-Code",
+            "value": "A0001",
+            "type": "text"
+          },
+          {
+            "key": "X-Bouncer-Code",
+            "value": "B000",
+            "type": "text"
+          },
+          {
+            "key": "X-Device-Id",
+            "value": "abdc60ab-3546-4573-a2d3-ede15a79da98",
+            "type": "text"
+          },
+          {
+            "key": "X-App-Version",
+            "value": "0.0.1",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"bd_id\": \"1동\",\r\n    \"bd_unit\": \"402호\",\r\n    \"phone\": \"010-2342-5123\",\r\n    \"visit_date\": \"2026-01-28\",\r\n    \"visit_time\": \"12:34\",\r\n    \"visit_close_date\": \"2026-01-29\",\r\n    \"memo\": \"방문증\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/vehicles/visitors/55가1253/2026-01-28",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "vehicles",
+            "visitors",
+            "55가1253",
+            "2026-01-28"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Ssearch Vehicle",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Apt-Code",
+            "value": "A0001",
+            "type": "text"
+          },
+          {
+            "key": "X-Bouncer-Code",
+            "value": "B000",
+            "type": "text"
+          },
+          {
+            "key": "X-Device-Id",
+            "value": "abdc60ab-3546-4573-a2d3-ede15a79da98",
+            "type": "text"
+          },
+          {
+            "key": "X-App-Version",
+            "value": "0.0.1",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseURL}}/api/vehicles/58마6661",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "vehicles",
+            "58마6661"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Search Notices",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Apt-Code",
+            "value": "A0001",
+            "type": "text"
+          },
+          {
+            "key": "X-Bouncer-Code",
+            "value": "B000",
+            "type": "text"
+          },
+          {
+            "key": "X-Device-Id",
+            "value": "abdc60ab-3546-4573-a2d3-ede15a79da98",
+            "type": "text"
+          },
+          {
+            "key": "X-App-Version",
+            "value": "0.0.1",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"vehicle_no\": \"55가1253\",\r\n    \"bd_id\": \"1동\",\r\n    \"bd_unit\": \"402호\",\r\n    \"phone\": \"010-2342-5123\",\r\n    \"visit_date\": \"2026-01-28\",\r\n    \"visit_time\": \"12:34\",\r\n    \"visit_close_date\": \"2026-01-29\",\r\n    \"memo\": \"방문증\"\r\n}"
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/notices",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "notices"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseURL",
+      "value": "",
+      "type": "default"
+    }
+  ]
+}

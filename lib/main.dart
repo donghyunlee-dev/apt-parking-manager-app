@@ -10,8 +10,9 @@ import 'core/providers/settings_provider.dart';
 import 'core/devices/device_id_provider.dart';
 import 'core/sessions/app_init_result.dart';
 import 'core/sessions/session_context.dart';
-import 'screen/login/login_screen.dart';
 import 'screen/home/home_screen.dart';
+import 'screen/login/apartment_registration_screen.dart';
+import 'screen/login/login_screen.dart';
 import 'screen/resident/resident_vehicle_register_screen.dart';
 import 'screen/camera/vehicle_scan_screen.dart';
 import 'screen/app_init_screen.dart';
@@ -63,6 +64,7 @@ void main() async {
         ChangeNotifierProvider<SessionContext>.value(value: sessionContext),
         ChangeNotifierProvider<SettingsProvider>.value(value: settingsProvider),
         Provider<LocationService>.value(value: locationService),
+        Provider<DeviceIdProvider>.value(value: deviceIdProvider),
       ],
       child: ParkingApp(result: result,),
     ),
@@ -98,6 +100,10 @@ class ParkingApp extends StatelessWidget {
         '/': (context) => AppInitScreen(result: result),
         '/home': (context) => const HomeScreen(),
         '/login': (_) => const LoginScreen(),
+        '/apartment/register': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+          return ApartmentRegistrationScreen(initialAddress: args?['address']);
+        },
         '/vehicle-scan': (_) => const VehicleScanScreen(),
         '/resident/vehicle/register': (context) => const ResidentVehicleRegisterScreen(),
         '/visitor/vehicle/register': (context) => const VisitorVehicleRegisterScreen(),

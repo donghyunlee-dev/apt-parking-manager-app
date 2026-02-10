@@ -178,7 +178,7 @@ class _UserHeader extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '$bouncerName 관리원님',
+                  '$bouncerName님',
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,

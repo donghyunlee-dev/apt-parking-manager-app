@@ -130,6 +130,35 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     // 아파트가 없으면 아무것도 표시하지 않거나 정보를 안내함
+    if (apartment == null && !_isLoading) {
+      return SizedBox(
+        width: double.infinity,
+        child: OutlinedButton(
+          onPressed: () async {
+            final result = await Navigator.pushNamed(
+              context,
+              '/apartment/register',
+              arguments: {'address': _currentAddress},
+            );
+            if (result == true) {
+              _loadApartment(); // 등록 성공 후 다시 조회
+            }
+          },
+          style: OutlinedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            side: const BorderSide(color: AppColors.primary),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          child: const Text(
+            '아파트 등록',
+            style: TextStyle(fontSize: 16, color: AppColors.primary, fontWeight: FontWeight.bold),
+          ),
+        ),
+      );
+    }
+
     return const SizedBox();
   }
 
